@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+
+    <title>
+        Solubility-Weighted Index: fast and accurate prediction of protein
+        solubility
+    </title>
+
+    <meta name="description" content="Solubility-Weighted Index: fast and accurate prediction of protein solubility" />
+    <meta name="author" content="Bikash Kumar Bhandari" />
+
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="stylesheet" href="css/reset.css" />
+    <link rel="stylesheet" href="css/reveal.css" />
+    <link rel="stylesheet" href="css/theme/sky.css" id="theme" />
+
+    <!-- Theme used for syntax highlighting of code -->
+    <link rel="stylesheet" href="lib/css/monokai.css" />
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+    <!-- Printing and PDF exports -->
+    <script>
+        var link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.type = "text/css";
+        link.href = window.location.search.match(/print-pdf/gi) ?
+            "css/print/pdf.css" :
+            "css/print/paper.css";
+        document.getElementsByTagName("head")[0].appendChild(link);
+
+    </script>
+
+    <style>
+        .container {
+            display: flex;
+        }
+
+        .col {
+            flex: 1;
+        }
+
+        .btn {
+            background-color: black;
+            border: none;
+            color: white;
+            padding: 12px 16px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+
+        /* Darker background on mouse-over */
+        .btn:hover {
+            background-color: black;
+        }
+
+    </style>
+</head>
+
+<body>
+    <div class="reveal">
+        <div class="slides">
+            <section>
+                <h2>Solubility-Weighted Index</h2>
+                <h4>fast and accurate prediction of protein solubility</h4>
+                <p><small>https://doi.org/10.1101/2020.02.15.951012</small></p>
+                <hr />
+
+                <p><small><u>Bikash K Bhandari</u>, Paul P Gardner, Chun Shen Lim</small>
+                    <br><small>Gardner-BinfLab</small>
+                    <br>
+                    <small id="date"></small></p>
+                <script>
+                    setInterval(function() {
+                        $('#date').text(new Date().toLocaleString()),
+                            1000
+                    })
+
+                </script>
+            </section>
+
+            <section>
+                <h3>Motivation</h3>
+
+                <div class="container">
+                    <div class="col">
+                        <ul>
+                            <li>Half of the cloned target are expressed.</li>
+                            <li>Half of the expressed proteins are purified (soluble).</li>
+                            <li>
+                                Total success rate of getting a recombinant protein is around
+                                a quarter.
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="col">
+                        <div id="myDiv"></div>
+                        <script>
+                            var data = [{
+                                type: "sunburst",
+                                labels: [
+                                    "PSI:Biology",
+                                    "Unclonable",
+                                    "Cloned",
+                                    "Not expressed",
+                                    "Expressed",
+                                    "Purified",
+                                    "Not purified"
+                                ],
+                                parents: [
+                                    "",
+                                    "PSI:Biology",
+                                    "PSI:Biology",
+                                    "Cloned",
+                                    "Cloned",
+                                    "Expressed",
+                                    "Expressed"
+                                ],
+                                values: [57582, 14808, 42774, 21728, 21046, 10936, 10110],
+                                outsidetextfont: {
+                                    size: 20,
+                                    color: "#377eb8"
+                                },
+                                leaf: {
+                                    opacity: 0.4
+                                },
+                                marker: {
+                                    line: {
+                                        width: 1.5,
+                                        color: "#B6E880"
+                                    }
+                                },
+                                branchvalues: "total"
+                            }];
+
+                            var layout = {
+                                title: "Status of recombinant<br>protein production",
+                                plot_bgcolor: "rgba(105, 105, 105, 100)",
+                                paper_bgcolor: "rgba(0,0,0,0)",
+                                margin: {
+                                    t: 50, //top margin
+                                    l: 20, //left margin
+                                    r: 20, //right margin
+                                    b: 20 //bottom margin
+                                },
+                                width: 400,
+                                height: 400,
+                                font: {
+                                    size: 20
+                                }
+                            };
+
+                            Plotly.newPlot("myDiv", data, layout, {
+                                displayModeBar: false
+                            });
+
+                        </script>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h3>Problems</h3>
+                <ul>
+                    <li>Protein expression</li>
+                    <p>Solved using TIsigner</p>
+                    <li>Solubility</li>
+                    <p>This paper</p>
+                </ul>
+            </section>
+
+            <section>
+                <h3>Datasets used</h3>
+                <p><em>PSI:Biology (Feature analysis/Training)</em></p>
+                <ul>
+                    <li>
+                        12,216 target proteins on <i>Escherichia coli</i> with 8,238
+                        soluble proteins.
+                    </li>
+                    <li>Binary labelled (Soluble/Insoluble).</li>
+                </ul>
+
+                <p><em>eSOL (Testing)</em></p>
+                <ul>
+                    <li>3,198 <i>E. coli</i> proteins in a cell free system.</li>
+                    <li>Solubility expressed as percentages.</li>
+                </ul>
+            </section>
+
+            <section>
+                <h3>Features of the PSI:Biology data</h3>
+                <figure>
+                    <img data-src="images/roc_plots.jpg" alt="ROC plots" style="width:100%" class="plain" />
+                    <figcaption>
+                        Receiver Operating Characterstic (ROC) curves of protein features
+                        in PSI:Biology data.
+                    </figcaption>
+                </figure>
+            </section>
+
+            <section>
+                <h3>Flexibility</h3>
+                <div class="container">
+                    <div class="col">
+                        <ul>
+                            <li>Calculated by using normalised B-factors.</li>
+                            <li>B-factor is a measure of vibration of Cα atom.</li>
+                            <li>Each residue has a normalised B-factor.</li>
+                            <li>
+                                Flexibility is the sliding window average of B-factors across
+                                the protein.
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col">
+                        <figure>
+                            <img data-src="images/flexibility.gif" alt="Flexibility" style="width:100%" class="plain" />
+                        </figure>
+                        <figcaption>
+                            B-factors are a measure of how much atoms oscillate from the mean position in average.
+                        </figcaption>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h3>Solubility Weighted Index (SWI)</h3>
+                <p>Based on flexibility, we developed a new predictor: SWI</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Flexibility</th>
+                            <th>SWI</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Based on</td>
+                            <td>Normalised B-factors</td>
+                            <td>Optimised weights</td>
+                        </tr>
+                        <tr>
+                            <td>Method</td>
+                            <td>Sliding window average</td>
+                            <td>Average</td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section>
+                <h3>Solubility weighted index (SWI)</h3>
+                <figure>
+                    <img data-src="images/comparision.png" alt="SWI and flexibility comparision" style="width:45%" class="plain" />
+                    <figcaption>
+                        Comparision between B-factors and optimised weights
+                    </figcaption>
+                </figure>
+            </section>
+
+            <section>
+                <h3>Solubility weighted index (SWI)</h3>
+                <figure>
+                    <img data-src="images/benchmarking.jpg" alt="benchmarking" style="width:90%" class="plain"/>
+                    <figcaption>
+                        SWI is accurate and fast predictor of protein solubility
+                    </figcaption>
+                </figure>
+            </section>
+
+            <section>
+                <h3>Solubility weighted index (SWI)</h3>
+                <figure>
+                    <img data-src="images/testing.png" alt="Testing on eSOL" style="width:45%"  class="plain"/>
+                    <figcaption>
+                        SWI correlates strongly with protein solubility in an independent
+                        testing data (eSOL).
+                    </figcaption>
+                </figure>
+            </section>
+
+            <section data-background-iframe="https://tisigner.otago.ac.nz/sodope">
+                <div style="  position: relative;bottom: 8px;left: 16px;z-index:-1;font-size: 18px; box-shadow: 0 1px 4px rgba(0,0,0,0.5), 0 5px 25px rgba(0,0,0,0.2); background-color: rgba(0, 0, 0, 0.9); color: #fff; padding: 20px; font-size: 20px; text-align: left;" id="iframeBox">
+                    <button class="btn" style="float: right;">
+                        <i class="fa fa-close" onClick="hideFunc()"></i>
+                    </button>
+                    <h2>SoDoPE</h2>
+                    <p>
+                        Based on SWI, we also developed Soluble Domain for Protein
+                        Expression (SoDoPE) at https://tisigner.otago.ac.nz/sodope.
+                    </p>
+
+                    <script>
+                        function hideFunc() {
+                            $("#iframeBox").fadeOut();
+                        }
+
+                    </script>
+                </div>
+            </section>
+            <section data-transition="zoom">
+                <h3>Thank you! &#128578;&nbsp;</h3>
+            </section>
+
+
+        </div>
+    </div>
+
+    <script src="js/reveal.js"></script>
+
+    <script>
+        // More info about config & dependencies:
+        // - https://github.com/hakimel/reveal.js#configuration
+        // - https://github.com/hakimel/reveal.js#dependencies
+        Reveal.initialize({
+            hash: true,
+            transition: "fade-in-then-out",
+            dependencies: [
+                //{ src: "plugin/markdown/marked.js" },
+                //{ src: "plugin/markdown/markdown.js" },
+                //{ src: "plugin/highlight/highlight.js" },
+                //{ src: "plugin/notes/notes.js", async: true },
+                {
+                    src: 'plugin/zoom-js/zoom.js',
+                    async: true
+                },
+                {
+                    src: "plugin/mouse-pointer/mouse-pointer.js",
+                    async: true
+                }
+            ]
+        });
+
+    </script>
+</body>
+
+</html>
